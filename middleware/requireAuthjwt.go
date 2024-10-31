@@ -7,18 +7,16 @@ import (
 	"net/http"
 	"os"
 	"time"
-
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
 func RequireAuth(c *gin.Context){
 	tokenString, err := c.Cookie("Authorization")
-
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
-	
+	hmacSampleSecret :=[]byte(os.Getenv("SECERET"))
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		// Don't forget to validate the alg is what you expect:
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -26,11 +24,12 @@ func RequireAuth(c *gin.Context){
 		}
 		
 		// hmacSampleSecret is a []byte containing your secret, e.g. []byte("my_secret_key")
-		return os.Getenv("SECERET"), nil
+		return hmacSampleSecret, nil
 	})
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
+	fmt.Print( err)
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		if float64(time.Now().Unix()) > claims["exp"].(float64){
@@ -44,7 +43,6 @@ func RequireAuth(c *gin.Context){
 		}
 		c.Set("user",user)
 		c.Next()
-		fmt.Println(claims["foo"], claims["nbf"])
 	} else {
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}

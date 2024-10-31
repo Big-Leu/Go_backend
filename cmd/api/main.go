@@ -40,6 +40,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 func init() {
 	initializer.ConnectToDb()
 	initializer.SyncDatabase()
+	initializer.CreatClient()
 }
 
 func main() {
