@@ -21,6 +21,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.POST("/addEndpoint",controllers.ExecCommandInPod)
 	r.PATCH("/patchpod",controllers.PatchPod)
 	r.DELETE("/deletepod",controllers.DeletePod)
+	r.PATCH("/getLogs",controllers.GetPodsLogs)
 	return r
 }
 
