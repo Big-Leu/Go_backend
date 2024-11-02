@@ -6,16 +6,18 @@ import (
 	"path/filepath"
 
 	"k8s.io/client-go/kubernetes"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 type Kube struct {
-   client *kubernetes.Clientset
-   config *rest.Config
-   namespace string
+   Client *kubernetes.Clientset
+   Config *rest.Config
+   Namespace string
+   Pod  v1.PodInterface
 }
 
-var k = &Kube{}
+var K = &Kube{}
 
 func CreatClient() (*kubernetes.Clientset, *rest.Config) {
 	home, _ := os.UserHomeDir()
@@ -27,9 +29,10 @@ func CreatClient() (*kubernetes.Clientset, *rest.Config) {
 	}
 
 	client := kubernetes.NewForConfigOrDie(config)
-	k.client = client
-	k.config = config
-	k.namespace = "default"
+	K.Client = client
+	K.Config = config
+	K.Namespace = "default"
+	K.Pod = client.CoreV1().Pods(K.Namespace)
 	fmt.Println("client Created successfully")
 	return client, config
 }

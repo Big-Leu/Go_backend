@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-
+    	"kubequntumblock/controllers"
 	_ "github.com/joho/godotenv/autoload"
 
 	"kubequntumblock/internal/database"
@@ -14,8 +14,10 @@ import (
 
 type Server struct {
 	port int
-
+ 
 	db database.Service
+
+	K controllers.KubeService
 }
 
 func NewServer() *http.Server {
