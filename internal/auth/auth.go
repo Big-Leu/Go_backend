@@ -13,7 +13,6 @@ import (
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
 )
-var djlsf *goth.User
 const (
 	Key    = "ldsfjlasdjflajflj"
 	MaxAge = 86400 
