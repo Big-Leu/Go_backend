@@ -16,7 +16,7 @@ import (
 var djlsf *goth.User
 const (
 	Key    = "ldsfjlasdjflajflj"
-	MaxAge = 86400 * 30
+	MaxAge = 86400 
 	IsProd = true
 )
 
@@ -32,7 +32,7 @@ func NewAuth() {
 	store.Options.Path="/"
 	store.Options.HttpOnly = true
 	store.Options.Domain = "localhost"
-	store.Options.SameSite = http.SameSiteLaxMode
+	store.Options.SameSite = http.SameSiteDefaultMode
 	store.Options.Secure = IsProd
 
 	gothic.Store = store
@@ -54,6 +54,12 @@ func GoogleAuth(c *gin.Context){
 func GoogleAuthCallbackFunction(c *gin.Context){
 	q := c.Request.URL.Query()
 	q.Add("provider", "google")
+	cookie, err := c.Cookie("_gothic_session")
+	if err!= nil {
+		fmt.Println("Error is here")
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
@@ -68,7 +74,7 @@ func GoogleAuthCallbackFunction(c *gin.Context){
 		return
 	}
 	fmt.Println(userId)
-	w1 := util.Token(c,userId)
+	w1 := util.Token(c,userId,cookie)
 	http.Redirect(w1.Writer,w1.Request,"http://localhost:3000/home",http.StatusTemporaryRedirect)
 }
 func GitHubAuth(c *gin.Context){
@@ -81,6 +87,12 @@ func GitHubAuth(c *gin.Context){
 func GitHubAuthCallbackFunction(c *gin.Context){
 	q := c.Request.URL.Query()
 	q.Add("provider", "github")
+	cookie, err := c.Cookie("_gothic_session")
+	if err!= nil {
+		fmt.Println("Error is here")
+		c.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
 	c.Request.URL.RawQuery = q.Encode()
 	user, err := gothic.CompleteUserAuth(c.Writer, c.Request)
 	if err != nil {
@@ -94,11 +106,12 @@ func GitHubAuthCallbackFunction(c *gin.Context){
 		c.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
-	util.Token(c,userId)
+	util.Token(c,userId,cookie)
 	http.Redirect(c.Writer,c.Request,"http://localhost:3000/home",http.StatusTemporaryRedirect)
 }
 
 func Logout(c *gin.Context) {
 	gothic.Logout(c.Writer, c.Request)
+	c.SetCookie("Authorization", "", -1, "/", "localhost", false, true)
 	c.Redirect(http.StatusTemporaryRedirect, "http://localhost:3000")
 }

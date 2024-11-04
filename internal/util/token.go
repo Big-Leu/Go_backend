@@ -15,7 +15,7 @@ import (
 )
 
 
-func Token(c *gin.Context , user uint)(*gin.Context){
+func Token(c *gin.Context , user uint,goth_cooke string)(*gin.Context){
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256,jwt.MapClaims{
 		"sub" : user,
@@ -32,6 +32,7 @@ func Token(c *gin.Context , user uint)(*gin.Context){
 	}
 	c.SetSameSite(http.SameSiteDefaultMode) 
 
+	c.SetCookie("_gothic_session", goth_cooke, 3600*24, "/", "localhost", false, true)
 	c.SetCookie("Authorization", tokenString, 3600*24, "/", "localhost", false, true)
 	return c
 }
