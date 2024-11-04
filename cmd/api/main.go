@@ -8,7 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
-
+	"kubequntumblock/internal/auth"
 	"kubequntumblock/internal/initializer"
 	"kubequntumblock/internal/server"
 )
@@ -41,6 +41,7 @@ func init() {
 	initializer.ConnectToDb()
 	initializer.SyncDatabase()
 	initializer.CreatClient()
+	auth.NewAuth()
 }
 
 func main() {
