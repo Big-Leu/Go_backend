@@ -14,7 +14,7 @@ import (
 func (s *Server) RegisterRoutes() http.Handler {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
+        AllowOrigins:     []string{"http://localhost:3000", "http://localhost:8080","http://localhost:3000/"},
         AllowMethods:     []string{"GET", "POST", "PUT", "DELETE","PATCH"},
         AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
         ExposeHeaders:    []string{"Content-Length"},
@@ -34,6 +34,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.PATCH("/getLogs",middleware.RequireAuth,controllers.GetPodsLogs)
 	r.GET("/auth/google",auth.GoogleAuth)
 	r.GET("/auth/callback",auth.GoogleAuthCallbackFunction)
+	r.GET("/auth/github",auth.GitHubAuth)
+	r.GET("/github/auth/callback",auth.GitHubAuthCallbackFunction)
 	r.GET("/logout",auth.Logout)
 	return r
 }
