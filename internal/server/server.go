@@ -6,7 +6,7 @@ import (
 	"os"
 	"strconv"
 	"time"
-    	"kubequntumblock/controllers"
+    	"kubequntumblock/pkg/controllers"
 	_ "github.com/joho/godotenv/autoload"
 
 	"kubequntumblock/internal/database"

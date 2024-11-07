@@ -1,9 +1,9 @@
 package server
 
 import (
-	"kubequntumblock/controllers"
+	"kubequntumblock/pkg/controllers"
 	"kubequntumblock/internal/auth"
-	"kubequntumblock/middleware"
+	"kubequntumblock/pkg/middleware"
 	"net/http"
 	"time"
 

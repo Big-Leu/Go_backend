@@ -1,7 +1,7 @@
 package initializer
 
 import (
-	"kubequntumblock/models"
+	"kubequntumblock/pkg/models"
      "fmt"
 )
 func SyncDatabase(){

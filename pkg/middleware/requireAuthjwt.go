@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 	"kubequntumblock/internal/initializer"
-	"kubequntumblock/models"
+	"kubequntumblock/pkg/models"
 	"net/http"
 	"os"
 	"time"

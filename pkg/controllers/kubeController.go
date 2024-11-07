@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"kubequntumblock/internal/initializer"
-	"kubequntumblock/schemas"
+	"kubequntumblock/pkg/schemas"
 	"net/http"
 	"os"
 	"strings"

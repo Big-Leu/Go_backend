@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"kubequntumblock/internal/initializer"
-	"kubequntumblock/models"
-	"kubequntumblock/schemas"
+	"kubequntumblock/pkg/models"
+	"kubequntumblock/pkg/schemas"
 	"net/http"
 	"os"
 	"time"
