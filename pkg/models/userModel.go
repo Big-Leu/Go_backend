@@ -8,3 +8,8 @@ type User struct {
 	Password string
 
 }
+type EndPoint struct {
+    gorm.Model
+	EndpointType string 
+	EndpointName string `gorm:"unique"`
+}

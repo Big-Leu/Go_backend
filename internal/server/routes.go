@@ -37,6 +37,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 	r.GET("/auth/github",auth.GitHubAuth)
 	r.GET("/github/auth/callback",auth.GitHubAuthCallbackFunction)
 	r.GET("/logout",auth.Logout)
+	r.GET("/getEndpoints",controllers.ListEndPoints)
 	return r
 }
 

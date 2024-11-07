@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"kubequntumblock/internal/initializer"
+	"kubequntumblock/pkg/models"
 	"kubequntumblock/pkg/schemas"
 	"net/http"
 	"os"
@@ -128,12 +129,11 @@ func ExecCommandInPod(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	// Replace newlines and escape double quotes
+   
 	pod.FunctionBody = strings.ReplaceAll(pod.FunctionBody, "\n", "\\n")
 	// pod.FunctionBody = strings.ReplaceAll(pod.FunctionBody, `"`, `\"`)
-
-	// Prepare the Python command
+    EndPoint := models.EndPoint{EndpointType: pod.EndPoint ,EndpointName:pod.FunctionName}
+	initializer.DB.Create(&EndPoint)
 	pythonCommand := fmt.Sprintf(
 		`python script_to.py --endpoint_type %s --function_name %s --route %s --function_file '%s'`,
 		pod.EndPoint,

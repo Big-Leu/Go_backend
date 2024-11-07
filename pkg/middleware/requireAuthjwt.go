@@ -27,9 +27,9 @@ func RequireAuth(c *gin.Context){
 		return hmacSampleSecret, nil
 	})
 	if err != nil {
+		fmt.Print( "Error here in middleware",err)
 		c.AbortWithStatus(http.StatusUnauthorized)
 	}
-	fmt.Print( err)
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok {
 		if float64(time.Now().Unix()) > claims["exp"].(float64){

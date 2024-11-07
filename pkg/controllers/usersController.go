@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -98,4 +98,20 @@ func Validate(c *gin.Context) {
 	c.JSON(http.StatusOK,gin.H{
 		"message":" validated",
 	})
+}
+
+func ListEndPoints(c *gin.Context) {
+	var endpoints []schemas.EndPoint
+
+	if result := initializer.DB.Find(&endpoints); result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Error retrieving endpoints", "error": result.Error.Error()})
+		return
+	}
+
+	if len(endpoints) == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"message": "No endpoints found"})
+		return
+	}
+    fmt.Println(endpoints)
+	c.JSON(http.StatusOK, endpoints)
 }
