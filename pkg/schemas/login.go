@@ -9,4 +9,5 @@ type EndPoint struct {
 	ID   uint   `gorm:"primaryKey"`
 	EndpointType string `json:"endpointtype"`
 	EndpointName  string `json:"endpointname"`
+	EndpointRoute string `json:"endpointroute"`
 }

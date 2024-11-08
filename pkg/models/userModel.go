@@ -12,4 +12,5 @@ type EndPoint struct {
     gorm.Model
 	EndpointType string 
 	EndpointName string `gorm:"unique"`
+	EndpointRoute string `gorm:"unique"`
 }

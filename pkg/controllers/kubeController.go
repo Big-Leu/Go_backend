@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	v1 "k8s.io/api/core/v1"
@@ -124,65 +125,76 @@ func DeletePod(c *gin.Context){
 	c.IndentedJSON(http.StatusOK,gin.H{"PodName Deleted":podName})
 }
 func ExecCommandInPod(c *gin.Context) {
-	var pod schemas.Command
-	if err := c.ShouldBindJSON(&pod); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-   
-	pod.FunctionBody = strings.ReplaceAll(pod.FunctionBody, "\n", "\\n")
-	// pod.FunctionBody = strings.ReplaceAll(pod.FunctionBody, `"`, `\"`)
-    EndPoint := models.EndPoint{EndpointType: pod.EndPoint ,EndpointName:pod.FunctionName}
-	initializer.DB.Create(&EndPoint)
-	pythonCommand := fmt.Sprintf(
-		`python script_to.py --endpoint_type %s --function_name %s --route %s --function_file '%s'`,
-		pod.EndPoint,
-		pod.FunctionName,
-		pod.Route,
-		pod.FunctionBody,
-	)
+    var pod schemas.Command
+    if err := c.ShouldBindJSON(&pod); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+        return
+    }
 
-	fmt.Println(pythonCommand) // Use fmt.Println to see the output
+    // Replace newlines in the function body
+    pod.FunctionBody = strings.ReplaceAll(pod.FunctionBody, "\n", "\\n")
 
-	command := []string{"/bin/sh", "-c", pythonCommand}
+    pythonCommand := fmt.Sprintf(
+        `python script_to.py --endpoint_type %s --function_name %s --route %s --function_file '%s'`,
+        pod.EndPoint,
+        pod.FunctionName,
+        pod.Route,
+        pod.FunctionBody,
+    )
 
-	req := initializer.K.Client.CoreV1().RESTClient().
-		Post().
-		Resource("pods").
-		Name(pod.PodName).
-		Namespace(initializer.K.Namespace).
-		SubResource("exec").
-		Param("container", pod.ContainerName).
-		Param("stdout", "true").
-		Param("stderr", "true").
-		Param("tty", "false")
+    fmt.Println("Constructed python command:", pythonCommand)
 
-	for _, cmd := range command {
-		req.Param("command", cmd)
-	}
+    // Prepare the command to be executed in the pod
+    command := []string{"/bin/sh", "-c", pythonCommand}
 
-	l := &LogStreamer{}
-	Executor, err := remotecommand.NewSPDYExecutor(initializer.K.Config, http.MethodPost, req.URL())
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error creating executor: %s", err.Error())
-		return
-	}
+    req := initializer.K.Client.CoreV1().RESTClient().
+        Post().
+        Resource("pods").
+        Name(pod.PodName).
+        Namespace(initializer.K.Namespace).
+        SubResource("exec").
+        Param("container", pod.ContainerName).
+        Param("stdout", "true").
+        Param("stderr", "true").
+        Param("tty", "false")
 
-	// Execute the command
-	err = Executor.StreamWithContext(context.Background(), remotecommand.StreamOptions{
-		Stdin:  os.Stdin,
-		Stdout: l,
-		Stderr: nil,
-		Tty:    false, 
-	})
+    for _, cmd := range command {
+        req.Param("command", cmd)
+    }
 
-	if err != nil {
-		c.String(http.StatusInternalServerError, "Error executing command: %s", err.Error())
-		return
-	}
-	c.IndentedJSON(http.StatusOK, "Command executed successfully")
+    l := &LogStreamer{}
+    Executor, err := remotecommand.NewSPDYExecutor(initializer.K.Config, http.MethodPost, req.URL())
+    if err != nil {
+        fmt.Println("Error creating executor:", err.Error())
+        c.String(http.StatusInternalServerError, "Error creating executor: %s", err.Error())
+        return
+    }
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	err = Executor.StreamWithContext(ctx, remotecommand.StreamOptions{
+        Stdin:  os.Stdin,
+        Stdout: l,
+        Stderr: nil,
+        Tty:    false,
+    })
+
+    if err != nil {
+        fmt.Println("Error executing command:", err.Error())
+        c.String(http.StatusInternalServerError, "Error executing command: %s", err.Error())
+        return
+    }
+
+    EndPoint := models.EndPoint{EndpointType: pod.EndPoint, EndpointName: pod.FunctionName, EndpointRoute: pod.Route}
+    if err := initializer.DB.Create(&EndPoint).Error; err != nil {
+        fmt.Println("Error creating endpoint in DB:", err.Error())
+        c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create endpoint"})
+        return
+    }
+
+    c.IndentedJSON(http.StatusOK, "Command executed successfully")
 }
-
 
 func GetPods(c *gin.Context) {
 
